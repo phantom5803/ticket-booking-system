@@ -6,8 +6,9 @@ Starter backend for an airplane ticket booking system using Go.
 
 - Go HTTP API server
 - Basic routes for flights and bookings
-- In-memory seat reservation logic (prevents overbooking)
-- `docker-compose` for PostgreSQL and Redis (ready for next phase)
+- Professional layered folder structure (`domain`, `repository`, `service`, `transport/http`)
+- PostgreSQL-backed repositories with startup schema/seed migration
+- `docker-compose` for PostgreSQL and Redis
 
 ## API Endpoints
 
@@ -30,8 +31,9 @@ Example booking body:
 ## Run locally
 
 1. Make sure Go 1.22+ is installed.
-2. (Optional) start infra:
+2. Start infra:
    - `docker compose up -d`
+   - Postgres will be exposed on `localhost:5433`
 3. Run API:
    - `go run ./cmd/server`
 4. Test:
@@ -40,7 +42,6 @@ Example booking body:
 
 ## Suggested next upgrades
 
-- Move from in-memory store to PostgreSQL
 - Add user auth (JWT)
 - Add payment workflow + idempotency keys
 - Add booking cancellation and seat release

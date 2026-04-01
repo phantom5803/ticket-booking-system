@@ -1,25 +1,34 @@
 package main
 
 import (
+	"context"
 	"log"
-	"os"
 
-	"airline-booking/internal/api"
-	"airline-booking/internal/store"
+	"airline-booking/internal/config"
+	"airline-booking/internal/platform/db"
+	"airline-booking/internal/repository/postgres"
+	"airline-booking/internal/transport/http/router"
 )
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+	cfg := config.Load()
+
+	pool, err := db.Connect(cfg.DatabaseURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer pool.Close()
+
+	if err := db.MigrateAndSeed(context.Background(), pool); err != nil {
+		log.Fatal(err)
 	}
 
-	flightStore := store.NewFlightStore()
-	bookingStore := store.NewBookingStore()
-	server := api.NewServer(flightStore, bookingStore)
+	flightRepo := postgres.NewFlightRepository(pool)
+	bookingRepo := postgres.NewBookingRepository(pool)
+	server := router.New(flightRepo, bookingRepo)
 
-	log.Printf("server running on :%s", port)
-	if err := server.Routes().Run(":" + port); err != nil {
+	log.Printf("server running on :%s", cfg.Port)
+	if err := server.Run(":" + cfg.Port); err != nil {
 		log.Fatal(err)
 	}
 }
